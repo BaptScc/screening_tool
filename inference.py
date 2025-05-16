@@ -96,7 +96,7 @@ def document_processing(df, model_name = 'model', title_col='Title', abstract_co
 
 def pipeline_single_text(sentences, model_name) :
     my_pipeline = pipeline(model=model_name,
-             top_k = 1
+             top_k = 1, token = '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'
              )
     results = my_pipeline(sentences)
     probs = [r[0]['score'] if r[0]['label'] == 'LABEL_1' else 1-r[0]['score']
