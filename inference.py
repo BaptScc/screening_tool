@@ -1,7 +1,7 @@
 import pandas as pd
 import time
 import torch
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 from nltk.tokenize import sent_tokenize
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
@@ -9,6 +9,7 @@ from tqdm import tqdm
 
 def sentence_splitter(text):
     return [s.strip() for s in sent_tokenize(text) if s.strip()]
+
 
 class SentenceDataset(Dataset):
     def __init__(self, sentences):
@@ -46,7 +47,7 @@ def compute_labels(sentences, scores):
     sentence_level = list(zip(sentences, scores))
     return sentence_level, mean_p1, global_label
 
-def processing(df, model_name = 'model', title_col='Title', abstract_col='text'):
+def document_processing(df, model_name = 'model', title_col='Title', abstract_col='text'):
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -83,9 +84,42 @@ def processing(df, model_name = 'model', title_col='Title', abstract_col='text')
 
     return df
 
+
+
+
+
+def pipeline_single_text(sentences, model_name) :
+    my_pipeline = pipeline(model=model_name,
+             top_k = 1
+             )
+    results = my_pipeline(sentences)
+    probs = [r[0]['score'] if r[0]['label'] == 'LABEL_1' else 1-r[0]['score']
+             for r in results ]
+    
+    mean_prob = sum(probs) / len(probs)
+    label = 1 if mean_prob >= 0.5 else 0
+
+    ## results
+    df = pd.DataFrame(sentences, columns=['sentences'])
+
+    all_probabilities = [r[0]['score'] for r in results ]
+    all_labels = [1 if a >= 0.5 else 0 for a in all_probabilities]
+
+    df[['papermill_probability', 'label']] = list(zip(all_probabilities, all_labels))
+
+    return mean_prob, label, df
+
+def text_processing(text, model_name) :
+    sentences = sentence_splitter(text)
+    papermill_probability, label, df = pipeline_single_text(sentences, model_name)
+    
+    print(f"Total papermill probability: {papermill_probability}")
+    print(df)
+
+
 if __name__ == '__main__':
     start = time.time()
     df = pd.read_excel('/home/bscancar/cdd_institut_agro/df_bert_inference_comparison.xlsx')
-    df = processing(df)
+    df = document_processing(df)
     df.to_excel('/home/bscancar/cdd_institut_agro/df_bert_inference_comparison_opti.xlsx', index=False)
     print(f"✅ Done in {time.time()-start:.2f}s")
