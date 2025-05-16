@@ -10,7 +10,11 @@ from tqdm import tqdm
 
 
 def sentence_splitter(text):
-    return [s.strip() for s in sent_tokenize(text) if s.strip()]
+    try:
+        return [s.strip() for s in sent_tokenize(text) if s.strip()]
+    except LookupError:
+        nltk.download("punkt")
+        return [s.strip() for s in sent_tokenize(text) if s.strip()]
 
 
 class SentenceDataset(Dataset):
