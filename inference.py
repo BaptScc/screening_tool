@@ -4,6 +4,7 @@ import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
 import nltk
 nltk.download('punkt')
+nltk.download('punkt_tab')
 from nltk.tokenize import sent_tokenize
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
@@ -14,6 +15,7 @@ def sentence_splitter(text):
         return [s.strip() for s in sent_tokenize(text) if s.strip()]
     except LookupError:
         nltk.download("punkt")
+        nltk.download('punkt_tab')
         return [s.strip() for s in sent_tokenize(text) if s.strip()]
 
 
