@@ -1,8 +1,7 @@
-"""
 from setuptools import setup, find_packages
 
 setup(
-    name="papermill_screener",
+    name="screening_tool",  # Doit correspondre à ton dossier de package
     version="0.1.0",
     author="Baptiste Scancar",
     author_email="baptiste.scancar@agrocampus-ouest.fr",
@@ -11,13 +10,16 @@ setup(
     long_description_content_type="text/markdown",
     packages=find_packages(exclude=["tests*"]),
     install_requires=[
-        "pandas", "torch", "transformers", "nltk", "tqdm"
+        "pandas",
+        "torch",
+        "transformers",
+        "nltk",
+        "tqdm"
     ],
-    python_requires='>=3.7',
+    python_requires=">=3.7",
     entry_points={
         "console_scripts": [
-            "mon-analyse=mon_package.processing:main"
+            "mon-analyse=screening_tool.processing:main"
         ],
     },
 )
-"""
