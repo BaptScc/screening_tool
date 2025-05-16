@@ -121,8 +121,8 @@ def text_processing(text, model_name) :
     sentences = sentence_splitter(text)
     papermill_probability, label, df = pipeline_single_text(sentences, model_name)
     
-    print(f"Total papermill probability: {papermill_probability}")
-    print(df)
+    return papermill_probability, df
+
 
 
 if __name__ == '__main__':
