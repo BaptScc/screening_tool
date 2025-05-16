@@ -2,6 +2,8 @@ import pandas as pd
 import time
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
+import nltk
+nltk.download('punkt')
 from nltk.tokenize import sent_tokenize
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
