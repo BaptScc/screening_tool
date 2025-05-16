@@ -10,11 +10,11 @@ setup(
     long_description_content_type="text/markdown",
     packages=find_packages(exclude=["tests*"]),
     install_requires=[
-        "pandas",
-        "torch",
-        "transformers",
-        "nltk",
-        "tqdm"
+        "pandas == 2.2.3",
+        "torch == 2.5.1+cu121",
+        "transformers == 4.49.0",
+        "nltk == 3.9.1",
+        "tqdm == 4.67.1"
     ],
     python_requires=">=3.7",
     entry_points={
