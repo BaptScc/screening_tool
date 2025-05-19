@@ -110,7 +110,7 @@ def pipeline_single_text(sentences, model_name) :
     ## results
     df = pd.DataFrame(sentences, columns=['sentences'])
 
-    all_probabilities = [r[0]['score'] for r in results ]
+    all_probabilities = probs
     all_labels = [1 if a >= 0.5 else 0 for a in all_probabilities]
 
     df[['papermill_probability', 'label']] = list(zip(all_probabilities, all_labels))
