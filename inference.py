@@ -8,15 +8,60 @@ nltk.download('punkt_tab')
 from nltk.tokenize import sent_tokenize
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
+import re
+from bs4 import BeautifulSoup
+
+def clean_structured_abstract(text):
+    """
+    Supprime les titres d'abstracts structurés :
+    - en début de ligne (ou de texte), suivis de :, ., retour à la ligne ou majuscule
+    - OU intégrés dans le texte après ponctuation + espace (ex: '. Methods and analysis:')
+    """
+    if not isinstance(text, str):
+        return text  # sécurité pour valeurs non textuelles (NaN, etc.)
+
+    # Supprimer le HTML
+    text = BeautifulSoup(text, "html.parser").get_text(separator=" ")
+
+    headers = [
+        "background", "objective", "objectives", "methods", "materials and methods",
+        "results", "conclusion", "conclusions", "introduction", "design",
+        "setting", "participants", "main outcome measures", "background and aim",
+        "abstract", "abstract aims", "purpose", "aim", "aims", "Study Hypothesis", "Sample Size",
+        "Exclusion criteria", "Primary Objective", "Major Inclusion/Exclusion Criteria Inclusion criteria",
+        "Trial Registration", "Eligibility Criteria", "Data extraction and synthesis", "Primary and secondary outcome measures",
+        "Interventions", "Background/Objectives", "Introduction", "Methods and analysis", "Ethics and dissemination", "purose",
+        "Importance", "Data sources and study selection"
+    ]
+
+    headers.sort(key=lambda x: -len(x))  # pour éviter les collisions partielles
+    header_group = "|".join(map(re.escape, headers))
+
+    # 1. Supprimer les headers en début de ligne ou de texte, suivis de ponctuation ou majuscule
+    pattern = r"(?imx)^ \s* (?:{}) \s* (?:[:.\n\r]+|(?=\s*[A-Z]))".format(header_group)
+    text = re.sub(pattern, "", text)
+
+    # 2. Supprimer les headers insérés dans le texte après une ponctuation (ex: '. Methods and analysis:')
+    inline_pattern = r"(?i)([.;,:!?])\s+(?:{})\s*[:.]".format(header_group)
+    text = re.sub(inline_pattern, r"\1", text)
+
+    pattern_direct_caps = r"(?i)\b(?:{})\b(?=\s+[A-Z])".format(header_group)
+    text = re.sub(pattern_direct_caps, "", text)
+
+    # Nettoyage final : réduire les espaces multiples
+    cleaned_text = re.sub(r"\s+", " ", text).strip()
+
+    return cleaned_text
 
 
 def sentence_splitter(text):
     try:
-        return [s.strip() for s in sent_tokenize(text) if s.strip()]
+        new_text = clean_structured_abstract(text)
+        return [s.strip() for s in sent_tokenize(new_text) if s.strip()]
     except LookupError:
         nltk.download("punkt")
         nltk.download('punkt_tab')
-        return [s.strip() for s in sent_tokenize(text) if s.strip()]
+        return [s.strip() for s in sent_tokenize(new_text) if s.strip()]
 
 
 class SentenceDataset(Dataset):
@@ -91,9 +136,6 @@ def document_processing(df, model_name = 'model', title_col='Title', abstract_co
         'normal_papermill_probability']] = pd.DataFrame(outputs, index=df.index)
 
     return df
-
-
-
 
 
 def pipeline_single_text(sentences, model_name) :
