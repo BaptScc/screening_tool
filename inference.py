@@ -12,15 +12,10 @@ import re
 from bs4 import BeautifulSoup
 
 def clean_structured_abstract(text):
-    """
-    Supprime les titres d'abstracts structurés :
-    - en début de ligne (ou de texte), suivis de :, ., retour à la ligne ou majuscule
-    - OU intégrés dans le texte après ponctuation + espace (ex: '. Methods and analysis:')
-    """
-    if not isinstance(text, str):
-        return text  # sécurité pour valeurs non textuelles (NaN, etc.)
 
-    # Supprimer le HTML
+    if not isinstance(text, str):
+        return text 
+
     text = BeautifulSoup(text, "html.parser").get_text(separator=" ")
 
     headers = [
@@ -34,21 +29,18 @@ def clean_structured_abstract(text):
         "Importance", "Data sources and study selection"
     ]
 
-    headers.sort(key=lambda x: -len(x))  # pour éviter les collisions partielles
+    headers.sort(key=lambda x: -len(x)) 
     header_group = "|".join(map(re.escape, headers))
 
-    # 1. Supprimer les headers en début de ligne ou de texte, suivis de ponctuation ou majuscule
     pattern = r"(?imx)^ \s* (?:{}) \s* (?:[:.\n\r]+|(?=\s*[A-Z]))".format(header_group)
     text = re.sub(pattern, "", text)
 
-    # 2. Supprimer les headers insérés dans le texte après une ponctuation (ex: '. Methods and analysis:')
     inline_pattern = r"(?i)([.;,:!?])\s+(?:{})\s*[:.]".format(header_group)
     text = re.sub(inline_pattern, r"\1", text)
 
     pattern_direct_caps = r"(?i)\b(?:{})\b(?=\s+[A-Z])".format(header_group)
     text = re.sub(pattern_direct_caps, "", text)
 
-    # Nettoyage final : réduire les espaces multiples
     cleaned_text = re.sub(r"\s+", " ", text).strip()
 
     return cleaned_text
