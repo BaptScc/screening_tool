@@ -46,14 +46,19 @@ def clean_structured_abstract(text):
     return cleaned_text
 
 
+
 def sentence_splitter(text):
+    
     try:
         new_text = clean_structured_abstract(text)
-        return [s.strip() for s in sent_tokenize(new_text) if s.strip()]
+        protected = re.sub(r'\bet al\.', 'et al§', new_text)
+        return [s.strip().replace('et al§', 'et al.') for s in sent_tokenize(protected) if s.strip()]
+    
     except LookupError:
         nltk.download("punkt")
         nltk.download('punkt_tab')
-        return [s.strip() for s in sent_tokenize(new_text) if s.strip()]
+        return [s.strip().replace('et al§', 'et al.') for s in sent_tokenize(protected) if s.strip()]
+
 
 
 class SentenceDataset(Dataset):
