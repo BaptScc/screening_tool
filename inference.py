@@ -129,8 +129,8 @@ def document_processing(df, model_name = 'model', title_col='Title', abstract_co
         outputs.append(compute_labels(sent, scores))
 
     df[['sentence_level_predictions',
-        'probability_positive_class',
-        'normal_papermill_probability']] = pd.DataFrame(outputs, index=df.index)
+        'papermill_probability',
+        'probability_positive_class']] = pd.DataFrame(outputs, index=df.index)
 
     return df
 
