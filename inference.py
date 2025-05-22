@@ -130,7 +130,7 @@ def document_processing(df, model_name = 'model', title_col='Title', abstract_co
 
     df[['sentence_level_predictions',
         'papermill_probability',
-        'probability_positive_class']] = pd.DataFrame(outputs, index=df.index)
+        'prediction']] = pd.DataFrame(outputs, index=df.index)
 
     return df
 
