@@ -101,8 +101,8 @@ def document_processing(df, model_name = 'model', title_col='Title', abstract_co
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    tokenizer = AutoTokenizer.from_pretrained(model_name, use_auth_token = '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')
-    model = AutoModelForSequenceClassification.from_pretrained(model_name, use_auth_token ='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').to(device)
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForSequenceClassification.from_pretrained(model_name).to(device)
     model.eval()
 
     #1
@@ -137,7 +137,7 @@ def document_processing(df, model_name = 'model', title_col='Title', abstract_co
 
 def pipeline_single_text(sentences, model_name) :
     my_pipeline = pipeline(model=model_name,
-             top_k = 1, use_auth_token = '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'
+             top_k = 1,
              )
     results = my_pipeline(sentences)
     probs = [r[0]['score'] if r[0]['label'] == 'LABEL_1' else 1-r[0]['score']
